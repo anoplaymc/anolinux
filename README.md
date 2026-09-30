@@ -6,7 +6,7 @@ A custom Linux distribution based on **Arch Linux**, featuring **KDE Plasma**, a
 
 ## !! WARNING !! Bios(non-UEFI) installisation metod is on testing now, please use UEFI if you can!
 
-## BUGS:
+## BUGS !!IMPORTANT TO READ!!:
 ## 1.
 i found a bug on AnoLinux:
 when AnoLinux booting on virtualbox, it works normally 
