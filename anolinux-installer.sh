@@ -21,6 +21,12 @@ read -s -p "Enter new password for root: " ROOT_PASS
 echo
 echo "--------------------------------------------------"
 
+# Выбор типа загрузки (UEFI или BIOS)
+echo "Select boot mode:"
+echo "  1) UEFI (Recommended for modern systems & VMs)"
+echo "  2) BIOS / Legacy (For older systems)"
+read -p "Enter choice [1 or 2]: " BOOT_CHOICE
+
 if [ -z "$USER_NAME" ] || [ -z "$USER_PASS" ] || [ -z "$ROOT_PASS" ]; then
     echo "Error: Username and passwords cannot be empty!"
     exit 1
@@ -164,16 +170,16 @@ DESKTOP
 
 cp /usr/share/applications/ano-installer.desktop /etc/xdg/autostart/
 
-# Install GRUB bootloader
+# Install GRUB bootloader based on user choice
 echo ">>> Installing GRUB bootloader..."
 pacman -S --noconfirm grub efibootmgr
 
-if [ -d /sys/firmware/efi/efivars ]; then
+if [ "$BOOT_CHOICE" = "1" ]; then
     grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=AnoLinux --recheck
 else
-    ROOT_DEV=\$(findmnt -n -o SOURCE /mnt || findmnt -n -o SOURCE /)
-    DISK_DEV=\$(echo "\$ROOT_DEV" | sed 's/[0-9]*\$//' | sed 's/p\$//')
-    grub-install --target=i386-pc "\$DISK_DEV"
+    # Для BIOS просим указать диск (например /dev/sda)
+    read -p "Enter target disk for BIOS GRUB (e.g. /dev/sda): " TARGET_DISK
+    grub-install --target=i386-pc "\$TARGET_DISK"
 fi
 
 grub-mkconfig -o /boot/grub/grub.cfg
