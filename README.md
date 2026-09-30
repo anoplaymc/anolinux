@@ -19,6 +19,14 @@ when changing/deleting your fastfetch config (~/.config/fastfetch/config.jsonc)
 fastfetch can display Arch Linux logo, use my fastfetch config (uploaded on this repo) or copy "os logo" part from there
 from my fastfetch config if u want to keep linux logo
 on next version i will spoof AnoLinux from "arch" to "linux" or "lfs" on kernel settings
+
+How to put my fastfetch config:
+
+1. download file "fastfetch-config.jsonc" on this repo
+
+2. rename file to "config.jsonc"
+
+3. put this file on ~/.config/fastfetch/ (if this folder has file "config.jsonc" already - remove it)
 ## On next versions of AnoLinux Install script this bugs will be fixed!
 ## If you will find any bugs - tell me pls
 
