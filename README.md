@@ -6,6 +6,16 @@ A custom Linux distribution based on **Arch Linux**, featuring **KDE Plasma**, a
 
 ## !! WARNING !! Bios(non-UEFI) installisation metod is on testing now, please use UEFI if you can!
 
+## Usage:
+AnoLinux has a package manager "ano", its pacman-based and you can run "ano install" without sudo, 
+it will ask password automatically if need, full usage of "ano" you can find by typing "ano" in terminal
+
+After installisation you will have a preinstalled kde plasma, kitty, sddm, fastfetch 
+and basical system and DE utilities
+(You can install another shell, for example:
+Hyprland: "ano install hyprland"
+xfce: "ano install xfce4"
+
 ## 📦 Installation Guide
 
 To install AnoLinux, boot from any official Arch Linux Live ISO, connect to the internet, and follow these steps:
