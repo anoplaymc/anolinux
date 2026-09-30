@@ -73,7 +73,7 @@ mkdir -p /mnt/boot
 mount ${DISK}1 /mnt/boot
 
 ### Step 2. Install and run the Installer
-bash <(curl -sSL [https://raw.githubusercontent.com/anoplaymc/anolinux/main/anolinux-installer.sh](https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO/main/anolinux-installer.sh))
+bash <(curl -sSL https://raw.githubusercontent.com/anoplaymc/anolinux/refs/heads/main/anolinux-installer.sh)
 
 ### After the script finishes successfully, unmount and reboot:
 umount -R /mnt
