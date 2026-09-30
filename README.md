@@ -20,6 +20,7 @@ bash <(curl -sSL [https://raw.githubusercontent.com/anoplaymc/anolinux/main/anol
 
 ### After the script finishes successfully, unmount and reboot:
 umount -R /mnt
+
 reboot
 
 ### After rebooting enjoy your system!
