@@ -1,6 +1,152 @@
 #!/bin/bash
 set -e
 
+# ==========================================
+# 1. РЕЖИМ ОБНОВЛЕНИЯ КОНФИГУРАЦИИ (--apply-updates)
+# ==========================================
+if [ "$1" = "--apply-updates" ]; then
+    echo "=== Updating AnoLinux System Configurations ==="
+
+    # Обновляем /etc/os-release
+    sudo tee /etc/os-release > /dev/null << 'OSRELEASE'
+NAME="AnoLinux"
+ID=anolinux
+ID_LIKE=arch
+BUILD_ID=rolling
+ANSI_COLOR="36;1"
+HOME_URL="https://github.com/anoplaymc/anolinux"
+DOCUMENTATION_URL="https://github.com/anoplaymc/anolinux"
+SUPPORT_URL="https://github.com/anoplaymc/anolinux"
+BUG_REPORT_URL="https://github.com/anoplaymc/anolinux"
+PRIVACY_POLICY_URL="https://terms.archlinux.org/docs/privacy-policy/"
+LOGO=anolinux
+OSRELEASE
+
+    # Обновляем конфиг Fastfetch
+    sudo mkdir -p /etc/fastfetch
+    sudo tee /etc/fastfetch/config.jsonc > /dev/null << 'FASTFETCH_CONF'
+{
+  "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/master/doc/json_schema.json",
+  "logo": {
+    "type": "auto",
+    "source": "linux"
+  },
+  "modules": [
+    "title",
+    "separator",
+    "os",
+    "host",
+    "kernel",
+    "uptime",
+    "packages",
+    "shell",
+    "display",
+    "de",
+    "separator",
+    "wm",
+    "wmtheme",
+    "theme",
+    "icons",
+    "font",
+    "cursor",
+    "separator",
+    "terminal",
+    "terminalfont",
+    "cpu",
+    "gpu",
+    "memory",
+    "swap",
+    "disk",
+    "battery",
+    "poweradapter",
+    "localip",
+    "locale",
+    "break",
+    "colors"
+  ]
+}
+FASTFETCH_CONF
+
+    # Обновляем код пакетного менеджера 'ano' прямо в системе
+    sudo tee /usr/local/bin/ano > /dev/null << 'ANO_SCRIPT'
+#!/bin/bash
+if [ "$1" = "update" ]; then
+    sudo pacman -Syu
+elif [ "$1" = "install" ]; then
+    shift
+    sudo pacman -S "$@"
+elif [ "$1" = "remove" ]; then
+    shift
+    sudo pacman -R "$@"
+elif [ "$1" = "search" ]; then
+    shift
+    sudo pacman -Ss "$@"
+elif [ "$1" = "systemupdate" ]; then
+    echo "Checking for updates..."
+    TEMP_SCRIPT="/tmp/anolinux-latest.sh"
+    
+    if curl -sSL "https://raw.githubusercontent.com/anoplaymc/anolinux/main/anolinux-installer.sh" -o "$TEMP_SCRIPT"; then
+        
+        if grep -q "ID=anolinux" /etc/os-release; then
+            echo "AnoLinux detected. Proceeding with update check..."
+        else
+            echo "Error: This system is not recognized as AnoLinux!"
+            rm -f "$TEMP_SCRIPT"
+            exit 1
+        fi
+
+        if [ ! -f "/etc/anolinux/installed-installer.sh" ]; then
+            sudo mkdir -p /etc/anolinux
+            sudo cp "$TEMP_SCRIPT" /etc/anolinux/installed-installer.sh
+            sudo chmod +x /etc/anolinux/installed-installer.sh
+            echo "Baseline created successfully!"
+            rm -f "$TEMP_SCRIPT"
+            exit 0
+        fi
+
+        if cmp -s "/etc/anolinux/installed-installer.sh" "$TEMP_SCRIPT"; then
+            echo "Updates not found!"
+            rm -f "$TEMP_SCRIPT"
+        else
+            echo "Updates found! Install updates? [y/n]"
+            read -p "> " CONFIRM
+            if [[ "$CONFIRM" =~ ^([yY][eE][sS]|[yY])$ ]]; then
+                echo "Applying configuration updates..."
+                sudo cp "$TEMP_SCRIPT" /etc/anolinux/installed-installer.sh
+                sudo chmod +x /etc/anolinux/installed-installer.sh
+                
+                sudo bash /etc/anolinux/installed-installer.sh --apply-updates
+                
+                rm -f "$TEMP_SCRIPT"
+                echo "AnoLinux configuration updated successfully without losing your files!"
+            else
+                echo "Update cancelled."
+                rm -f "$TEMP_SCRIPT"
+            fi
+        fi
+    else
+        echo "Error: Failed to download update from GitHub!"
+        rm -f "$TEMP_SCRIPT"
+    fi
+else
+    echo "=== AnoLinux Package Manager (ano) ==="
+    echo "Usage:"
+    echo "  ano update       - Synchronize and upgrade system"
+    echo "  ano install      - Install software packages"
+    echo "  ano remove       - Remove software packages"
+    echo "  ano search       - Search in AnoLinux repositories"
+    echo "  ano systemupdate - Check and update AnoLinux configuration"
+fi
+ANO_SCRIPT
+    sudo chmod +x /usr/local/bin/ano
+
+    echo "AnoLinux configuration updated successfully!"
+    exit 0
+fi
+
+# ==========================================
+# 2. РЕЖИМ ЧИСТОЙ УСТАНОВКИ (С ISO)
+# ==========================================
 echo "=================================================="
 echo "          ANOLINUX INSTALLATION SCRIPT            "
 echo "=================================================="
@@ -9,51 +155,56 @@ echo "=================================================="
 if ! mountpoint -q /mnt; then
     echo "Error: Nothing is mounted at /mnt!"
     echo "Please partition your disk and mount the root partition to /mnt first."
-    echo "--------------------------------------------------"
     exit 1
 fi
 
-# 2. Interactive input & configuration choices BEFORE installation
+# 2. Interactive input before entering chroot
 echo "--------------------------------------------------"
 read -p "Install NVIDIA Drivers? [y/N]: " NVIDIA_CHOICE
-
 read -p "Enter new username for AnoLinux: " USER_NAME
 read -s -p "Enter password for user $USER_NAME: " USER_PASS
 echo
 read -s -p "Enter new password for root: " ROOT_PASS
 echo
+echo "--------------------------------------------------"
 
+# Выбор типа загрузки (UEFI или BIOS)
 echo "Select boot mode:"
 echo "  1) UEFI (Recommended for modern systems & VMs)"
-echo "  2) BIOS / Legacy (For older systems, in beta testing rn)"
+echo "  2) BIOS / Legacy (For older systems)"
 read -p "Enter choice [1 or 2]: " BOOT_CHOICE
-echo "--------------------------------------------------"
 
 if [ -z "$USER_NAME" ] || [ -z "$USER_PASS" ] || [ -z "$ROOT_PASS" ]; then
     echo "Error: Username and passwords cannot be empty!"
     exit 1
 fi
 
-# Define Classic packages
-INSTALL_PKGS="base base-devel linux linux-firmware sudo networkmanager git python-pyqt6 python-requests sddm plasma-meta konsole kitty fastfetch firefox curl"
+# Формируем список пакетов
+INSTALL_PKGS="base base-devel linux linux-firmware sudo networkmanager sddm plasma-meta konsole kitty fastfetch firefox git python-pyqt6 python-requests curl"
 
-# Add NVIDIA packages to installation list if requested
-NVIDIA_PKGS=""
 if [[ "$NVIDIA_CHOICE" =~ ^([yY][eE][sS]|[yY])$ ]]; then
-    NVIDIA_PKGS="nvidia-dkms nvidia-utils nvidia-settings"
+    INSTALL_PKGS="$INSTALL_PKGS nvidia-dkms nvidia-utils nvidia-settings"
     echo "=== NVIDIA drivers will be included ==="
 fi
 
-# 3. Install system stack via pacstrap
-echo "=== Installing Arch base & AnoLinux Classic Stack ==="
-pacstrap /mnt $INSTALL_PKGS $NVIDIA_PKGS
+# 3. Install stack via pacstrap
+echo "=== Installing Arch base, KDE Plasma, Kitty, Fastfetch & Ano Stack ==="
+pacstrap /mnt $INSTALL_PKGS
 
 # 4. Generate fstab
 echo "=== Generating fstab ==="
 genfstab -U /mnt >> /mnt/etc/fstab
 
-# Capture the exact path/content of the currently running installer script
+# Сохраняем текущий скрипт как эталон для будущих обновлений через systemupdate
 CURRENT_SCRIPT_PATH="$(readlink -f "$0")"
+sudo mkdir -p /mnt/etc/anolinux
+if [ -f "$CURRENT_SCRIPT_PATH" ]; then
+    cp "$CURRENT_SCRIPT_PATH" /mnt/etc/anolinux/installed-installer.sh
+else
+    # Fallback на случай запуска через curl pipe
+    echo "# AnoLinux Baseline" > /mnt/etc/anolinux/installed-installer.sh
+fi
+chmod +x /mnt/etc/anolinux/installed-installer.sh
 
 # 5. Deep Customization Inside chroot
 echo "=== Applying AnoLinux Customization (Branding, Kernel, Tools) ==="
@@ -79,7 +230,7 @@ sed -i 's/# %wheel ALL=(ALL:ALL) ALL/%wheel ALL=(ALL:ALL) ALL/' /etc/sudoers
 cat << 'OSRELEASE' > /etc/os-release
 NAME="AnoLinux"
 ID=anolinux
-ID_LIKE=linux
+ID_LIKE=arch
 BUILD_ID=rolling
 ANSI_COLOR="36;1"
 HOME_URL="https://github.com/anoplaymc/anolinux"
@@ -93,20 +244,7 @@ OSRELEASE
 # Kernel branding in GRUB title
 sed -i 's/TITLE=Arch Linux/TITLE=AnoLinux/g' /etc/grub.d/10_linux || true
 
-# Save the current installer script inside the system as a baseline for future updates
-mkdir -p /etc/anolinux
-if [ -f "$CURRENT_SCRIPT_PATH" ]; then
-    cp "$CURRENT_SCRIPT_PATH" /etc/anolinux/installed-installer.sh
-else
-    # Fallback if executed via curl pipe
-    cat << 'FALLBACK_EOF' > /etc/anolinux/installed-installer.sh
-#!/bin/bash
-echo "AnoLinux baseline config"
-FALLBACK_EOF
-fi
-chmod +x /etc/anolinux/installed-installer.sh
-
-# Creating our custom package manager wrapper 'ano' with systemupdate
+# Creating our custom package manager wrapper 'ano'
 cat << 'ANO_SCRIPT' > /usr/local/bin/ano
 #!/bin/bash
 if [ "\$1" = "update" ]; then
@@ -124,10 +262,25 @@ elif [ "\$1" = "systemupdate" ]; then
     echo "Checking for updates..."
     TEMP_SCRIPT="/tmp/anolinux-latest.sh"
     
-    # Download latest script from GitHub
     if curl -sSL "https://raw.githubusercontent.com/anoplaymc/anolinux/main/anolinux-installer.sh" -o "\$TEMP_SCRIPT"; then
         
-        # Compare downloaded script with the baseline saved during installation
+        if grep -q "ID=anolinux" /etc/os-release; then
+            echo "AnoLinux detected. Proceeding with update check..."
+        else
+            echo "Error: This system is not recognized as AnoLinux!"
+            rm -f "\$TEMP_SCRIPT"
+            exit 1
+        fi
+
+        if [ ! -f "/etc/anolinux/installed-installer.sh" ]; then
+            sudo mkdir -p /etc/anolinux
+            sudo cp "\$TEMP_SCRIPT" /etc/anolinux/installed-installer.sh
+            sudo chmod +x /etc/anolinux/installed-installer.sh
+            echo "Baseline created successfully!"
+            rm -f "\$TEMP_SCRIPT"
+            exit 0
+        fi
+
         if cmp -s "/etc/anolinux/installed-installer.sh" "\$TEMP_SCRIPT"; then
             echo "Updates not found!"
             rm -f "\$TEMP_SCRIPT"
@@ -135,16 +288,14 @@ elif [ "\$1" = "systemupdate" ]; then
             echo "Updates found! Install updates? [y/n]"
             read -p "> " CONFIRM
             if [[ "\$CONFIRM" =~ ^([yY][eE][sS]|[yY])$ ]]; then
-                echo "Applying updates..."
-                # Update local baseline to the new version
-                cp "\$TEMP_SCRIPT" /etc/anolinux/installed-installer.sh
-                chmod +x /etc/anolinux/installed-installer.sh
+                echo "Applying configuration updates..."
+                sudo cp "\$TEMP_SCRIPT" /etc/anolinux/installed-installer.sh
+                sudo chmod +x /etc/anolinux/installed-installer.sh
                 
-                # Execute update logic (safeguarding user data)
-                bash /etc/anolinux/installed-installer.sh --apply-updates || echo "Update execution finished."
+                sudo bash /etc/anolinux/installed-installer.sh --apply-updates
                 
                 rm -f "\$TEMP_SCRIPT"
-                echo "AnoLinux system configuration updated successfully!"
+                echo "AnoLinux configuration updated successfully without losing your files!"
             else
                 echo "Update cancelled."
                 rm -f "\$TEMP_SCRIPT"
@@ -231,7 +382,7 @@ Type=Application
 Categories=System;
 DESKTOP
 
-cp /usr/share/applications/ano-installer.desktop /etc/xdg/autostart/ || true
+cp /usr/share/applications/ano-installer.desktop /etc/xdg/autostart/
 
 # Install GRUB bootloader based on user choice
 echo ">>> Installing GRUB bootloader..."
