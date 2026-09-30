@@ -7,13 +7,19 @@ A custom Linux distribution based on **Arch Linux**, featuring **KDE Plasma**, a
 ## !! WARNING !! Bios(non-UEFI) installisation metod is on testing now, please use UEFI if you can!
 
 ## BUGS:
+## 1.
 i found a bug on AnoLinux:
 when AnoLinux booting on virtualbox, it works normally 
 but when i was installed AnoLinux on my pc with NVIDIA RTX 4060
 its been very laggy, you need to press CTRL+ALT+F3 and on terminal shell
 type: ano install nvidia-dkms nvidia-utils nvidia-settings
 and AnoLinux will work normally
-## On next versions of AnoLinux Install script this bug will be fixed!
+## 2.
+when changing/deleting your fastfetch config (~/.config/fastfetch/config.jsonc)
+fastfetch can display Arch Linux logo, use my fastfetch config (uploaded on this repo) or copy "os logo" part from there
+from my fastfetch config if u want to keep linux logo
+on next version i will spoof AnoLinux from "arch" to "linux" or "lfs" on kernel settings
+## On next versions of AnoLinux Install script this bugs will be fixed!
 ## If you will find any bugs - tell me pls
 
 ## Usage:
