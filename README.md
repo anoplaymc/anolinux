@@ -8,8 +8,11 @@ To install AnoLinux, boot from any official Arch Linux Live ISO, connect to the 
 
 ### Step 1. Disk Partitioning (Example for `/dev/sda`, if your disk is not /dev/sda type "lsblk")
 parted /dev/sda --script mklabel gpt
+
 parted /dev/sda --script mkpart primary ext4 0% 100%
+
 mkfs.ext4 -F /dev/sda1
+
 mount /dev/sda1 /mnt
 
 ### Step 2. Install and run the Installer
