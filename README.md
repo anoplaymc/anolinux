@@ -56,4 +56,4 @@ umount -R /mnt
 
 reboot
 
-### After rebooting enjoy your system!
+### After rebooting choose "Arch Linux"(first line on "GRUB") and enjoy your system!
