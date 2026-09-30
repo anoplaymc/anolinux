@@ -4,6 +4,8 @@ A custom Linux distribution based on **Arch Linux**, featuring **KDE Plasma**, a
 
 ## !! If you are beginner on linux, installing AnoLinux is not really recommended !!
 
+## !! WARNING !! Bios(non-UEFI) installisation metod is on testing now, please use UEFI if you can!
+
 ## 📦 Installation Guide
 
 To install AnoLinux, boot from any official Arch Linux Live ISO, connect to the internet, and follow these steps:
