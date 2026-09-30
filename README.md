@@ -2,6 +2,8 @@
 
 A custom Linux distribution based on **Arch Linux**, featuring **KDE Plasma**, a custom `ano` package manager wrapper, pre-configured `fastfetch`, and an automated graphical installer.
 
+## !! If you are beginner on linux, installing AnoLinux is not really recommended !!
+
 ## 📦 Installation Guide
 
 To install AnoLinux, boot from any official Arch Linux Live ISO, connect to the internet, and follow these steps:
