@@ -9,6 +9,7 @@ A custom Linux distribution based on **Arch Linux**, featuring **KDE Plasma**, a
 ## Usage:
 AnoLinux has a package manager "ano", its pacman-based and you can run "ano install" without sudo, 
 it will ask password automatically if need, full usage of "ano" you can find by typing "ano" in terminal
+Also you can use basic pacman package manager there!
 
 After installisation you will have a preinstalled kde plasma, kitty, sddm, fastfetch 
 and basical system and DE utilities
