@@ -2,43 +2,58 @@
 set -e
 
 echo "=================================================="
-echo "          ANOLINUX INSTALLATION SCRIPT             "
+echo "          ANOLINUX INSTALLATION SCRIPT            "
 echo "=================================================="
 
 # 1. Check if the disk is mounted to /mnt
 if ! mountpoint -q /mnt; then
     echo "Error: Nothing is mounted at /mnt!"
     echo "Please partition your disk and mount the root partition to /mnt first."
+    echo "--------------------------------------------------"
     exit 1
 fi
 
-# 2. Interactive input before entering chroot
+# 2. Interactive input & configuration choices BEFORE installation
 echo "--------------------------------------------------"
+read -p "Install NVIDIA Drivers? [y/N]: " NVIDIA_CHOICE
+
 read -p "Enter new username for AnoLinux: " USER_NAME
 read -s -p "Enter password for user $USER_NAME: " USER_PASS
 echo
 read -s -p "Enter new password for root: " ROOT_PASS
 echo
-echo "--------------------------------------------------"
 
-# Выбор типа загрузки (UEFI или BIOS)
 echo "Select boot mode:"
 echo "  1) UEFI (Recommended for modern systems & VMs)"
-echo "  2) BIOS / Legacy (For older systems)"
+echo "  2) BIOS / Legacy (For older systems, in beta testing rn)"
 read -p "Enter choice [1 or 2]: " BOOT_CHOICE
+echo "--------------------------------------------------"
 
 if [ -z "$USER_NAME" ] || [ -z "$USER_PASS" ] || [ -z "$ROOT_PASS" ]; then
     echo "Error: Username and passwords cannot be empty!"
     exit 1
 fi
 
-# 3. Install base system, KDE, Kitty, Fastfetch, and stack via pacstrap
-echo "=== Installing Arch base, KDE Plasma, Kitty, Fastfetch & Ano Stack ==="
-pacstrap /mnt base base-devel linux linux-firmware sudo networkmanager sddm plasma-meta konsole kitty fastfetch firefox git python-pyqt6 python-requests
+# Define Classic packages
+INSTALL_PKGS="base base-devel linux linux-firmware sudo networkmanager git python-pyqt6 python-requests sddm plasma-meta konsole kitty fastfetch firefox curl"
+
+# Add NVIDIA packages to installation list if requested
+NVIDIA_PKGS=""
+if [[ "$NVIDIA_CHOICE" =~ ^([yY][eE][sS]|[yY])$ ]]; then
+    NVIDIA_PKGS="nvidia-dkms nvidia-utils nvidia-settings"
+    echo "=== NVIDIA drivers will be included ==="
+fi
+
+# 3. Install system stack via pacstrap
+echo "=== Installing Arch base & AnoLinux Classic Stack ==="
+pacstrap /mnt $INSTALL_PKGS $NVIDIA_PKGS
 
 # 4. Generate fstab
 echo "=== Generating fstab ==="
 genfstab -U /mnt >> /mnt/etc/fstab
+
+# Capture the exact path/content of the currently running installer script
+CURRENT_SCRIPT_PATH="$(readlink -f "$0")"
 
 # 5. Deep Customization Inside chroot
 echo "=== Applying AnoLinux Customization (Branding, Kernel, Tools) ==="
@@ -64,7 +79,7 @@ sed -i 's/# %wheel ALL=(ALL:ALL) ALL/%wheel ALL=(ALL:ALL) ALL/' /etc/sudoers
 cat << 'OSRELEASE' > /etc/os-release
 NAME="AnoLinux"
 ID=anolinux
-ID_LIKE=arch
+ID_LIKE=linux
 BUILD_ID=rolling
 ANSI_COLOR="36;1"
 HOME_URL="https://github.com/anoplaymc/anolinux"
@@ -78,7 +93,20 @@ OSRELEASE
 # Kernel branding in GRUB title
 sed -i 's/TITLE=Arch Linux/TITLE=AnoLinux/g' /etc/grub.d/10_linux || true
 
-# Creating our custom package manager wrapper 'ano'
+# Save the current installer script inside the system as a baseline for future updates
+mkdir -p /etc/anolinux
+if [ -f "$CURRENT_SCRIPT_PATH" ]; then
+    cp "$CURRENT_SCRIPT_PATH" /etc/anolinux/installed-installer.sh
+else
+    # Fallback if executed via curl pipe
+    cat << 'FALLBACK_EOF' > /etc/anolinux/installed-installer.sh
+#!/bin/bash
+echo "AnoLinux baseline config"
+FALLBACK_EOF
+fi
+chmod +x /etc/anolinux/installed-installer.sh
+
+# Creating our custom package manager wrapper 'ano' with systemupdate
 cat << 'ANO_SCRIPT' > /usr/local/bin/ano
 #!/bin/bash
 if [ "\$1" = "update" ]; then
@@ -92,13 +120,48 @@ elif [ "\$1" = "remove" ]; then
 elif [ "\$1" = "search" ]; then
     shift
     sudo pacman -Ss "\$@"
+elif [ "\$1" = "systemupdate" ]; then
+    echo "Checking for updates..."
+    TEMP_SCRIPT="/tmp/anolinux-latest.sh"
+    
+    # Download latest script from GitHub
+    if curl -sSL "https://raw.githubusercontent.com/anoplaymc/anolinux/main/anolinux-installer.sh" -o "\$TEMP_SCRIPT"; then
+        
+        # Compare downloaded script with the baseline saved during installation
+        if cmp -s "/etc/anolinux/installed-installer.sh" "\$TEMP_SCRIPT"; then
+            echo "Updates not found!"
+            rm -f "\$TEMP_SCRIPT"
+        else
+            echo "Updates found! Install updates? [y/n]"
+            read -p "> " CONFIRM
+            if [[ "\$CONFIRM" =~ ^([yY][eE][sS]|[yY])$ ]]; then
+                echo "Applying updates..."
+                # Update local baseline to the new version
+                cp "\$TEMP_SCRIPT" /etc/anolinux/installed-installer.sh
+                chmod +x /etc/anolinux/installed-installer.sh
+                
+                # Execute update logic (safeguarding user data)
+                bash /etc/anolinux/installed-installer.sh --apply-updates || echo "Update execution finished."
+                
+                rm -f "\$TEMP_SCRIPT"
+                echo "AnoLinux system configuration updated successfully!"
+            else
+                echo "Update cancelled."
+                rm -f "\$TEMP_SCRIPT"
+            fi
+        fi
+    else
+        echo "Error: Failed to download update from GitHub!"
+        rm -f "\$TEMP_SCRIPT"
+    fi
 else
     echo "=== AnoLinux Package Manager (ano) ==="
     echo "Usage:"
-    echo "  ano update   - Synchronize and upgrade system"
-    echo "  ano install  - Install software packages"
-    echo "  ano remove   - Remove software packages"
-    echo "  ano search   - Search in AnoLinux repositories"
+    echo "  ano update       - Synchronize and upgrade system"
+    echo "  ano install      - Install software packages"
+    echo "  ano remove       - Remove software packages"
+    echo "  ano search       - Search in AnoLinux repositories"
+    echo "  ano systemupdate - Check and update AnoLinux configuration"
 fi
 ANO_SCRIPT
 chmod +x /usr/local/bin/ano
@@ -168,7 +231,7 @@ Type=Application
 Categories=System;
 DESKTOP
 
-cp /usr/share/applications/ano-installer.desktop /etc/xdg/autostart/
+cp /usr/share/applications/ano-installer.desktop /etc/xdg/autostart/ || true
 
 # Install GRUB bootloader based on user choice
 echo ">>> Installing GRUB bootloader..."
@@ -177,7 +240,6 @@ pacman -S --noconfirm grub efibootmgr
 if [ "$BOOT_CHOICE" = "1" ]; then
     grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=AnoLinux --recheck
 else
-    # Для BIOS просим указать диск (например /dev/sda)
     read -p "Enter target disk for BIOS GRUB (e.g. /dev/sda): " TARGET_DISK
     grub-install --target=i386-pc "\$TARGET_DISK"
 fi
