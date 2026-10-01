@@ -13,7 +13,7 @@ when AnoLinux booting on virtualbox, it works normally
 but when i was installed AnoLinux on my pc with NVIDIA RTX 4060
 its been very laggy, you need to press CTRL+ALT+F3 and on terminal shell
 type: ano install nvidia-dkms nvidia-utils nvidia-settings
-and AnoLinux will work normally
+and AnoLinux will work normally (Edited: I'm just added new script "configure.sh" and if you will install the distro by this guide, you will install this script!)
 ## 2.
 when changing/deleting your fastfetch config (~/.config/fastfetch/config.jsonc)
 fastfetch can display Arch Linux logo, use my fastfetch config (uploaded on this repo) or copy "os logo" part from there
