@@ -45,8 +45,86 @@ case "$SHELL_CHOICE" in
         ;;
 esac
 
-echo "================================================--"
+echo "--------------------------------------------------"
+
+# 3. Установка AUR helper (yay)
+read -p "Install AUR (yay) (git included)? [y/n]: " YAY_CHOICE
+
+if [[ "$YAY_CHOICE" =~ ^[Yy]$ ]]; then
+    echo "=== Installing base-devel, git and building yay ==="
+    ano install --needed base-devel git
+    git clone https://aur.archlinux.org/yay.git
+    cd yay
+    makepkg -si
+    cd ..
+    rm -rf yay
+else
+    echo "=== Skipping AUR (yay) installation ==="
+fi
+
+echo "--------------------------------------------------"
+
+# 4. Выбор звукового сервера
+echo "Install PipeWire or PulseAudio?"
+echo "  1) Pipewire"
+echo "  2) PulseAudio"
+echo "  3) No, i will use system without sound"
+read -p "Enter choice [1-3]: " SOUND_CHOICE
+
+case "$SOUND_CHOICE" in
+    1)
+        echo "=== Installing PipeWire ==="
+        ano install pipewire
+        ;;
+    2)
+        echo "=== Installing PulseAudio ==="
+        ano install pulseaudio
+        ;;
+    3|*)
+        echo "=== Skipping sound server installation ==="
+        ;;
+esac
+
+echo "--------------------------------------------------"
+
+# 5. Установка регулятора громкости
+read -p "Install Volume Control? (pavucontrol) [y/n]: " PAVU_CHOICE
+
+if [[ "$PAVU_CHOICE" =~ ^[Yy]$ ]]; then
+    echo "=== Installing pavucontrol ==="
+    ano install pavucontrol
+else
+    echo "=== Skipping pavucontrol installation ==="
+fi
+
+echo "--------------------------------------------------"
+
+# 6. Установка zsh и темы powerlevel10k
+read -p "Install zsh with powerlevel10k theme? (if you don't installed AUR before on this script, do not accept it! It will break script work!) [y/n]: " ZSH_CHOICE
+
+if [[ "$ZSH_CHOICE" =~ ^[Yy]$ ]]; then
+    echo "=== Installing ZSH and Meslo Nerd Font ==="
+    ano install zsh ttf-meslo-nerd-font-powerlevel10k
+    
+    echo "=== Changing default shell to ZSH ==="
+    chsh -s /usr/bin/zsh
+    
+    echo "=== Installing powerlevel10k theme from AUR ==="
+    yay -S --noconfirm zsh-theme-powerlevel10k-git
+    
+    echo "=== Configuring .zshrc ==="
+    echo 'source /usr/share/zsh-theme-powerlevel10k/powerlevel10k.zsh-theme' >> ~/.zshrc
+else
+    echo "=== Skipping ZSH installation ==="
+fi
+
+echo "=================================================="
 echo "AnoLinux configures successfully! Enjoy your system! :)"
 echo "(If you're installed another shell, choose it from login screen)"
 echo "(If your shell is xfce4, do not choose wayland session)"
-echo "================================================--"
+if [[ "$ZSH_CHOICE" =~ ^[Yy]$ ]]; then
+    echo ""
+    echo "Applying zsh configuration..."
+    source ~/.zshrc || true
+fi
+echo "=================================================="
