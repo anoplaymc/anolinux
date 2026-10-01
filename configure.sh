@@ -48,5 +48,4 @@ esac
 echo "================================================--"
 echo "AnoLinux configures successfully! Enjoy your system! :)"
 echo "(If you're installed another shell, choose it from login screen)"
-echo "(if your shell is xfce4, do not choose wayland session!)
 echo "================================================--"
