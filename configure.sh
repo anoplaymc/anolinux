@@ -104,7 +104,7 @@ read -p "Install zsh with powerlevel10k theme? (if you don't installed AUR befor
 
 if [[ "$ZSH_CHOICE" =~ ^[Yy]$ ]]; then
     echo "=== Installing ZSH and Meslo Nerd Font ==="
-    ano install zsh ttf-meslo-nerd-font-powerlevel10k
+    ano install zsh ttf-jetbrains-mono-nerd
     
     echo "=== Changing default shell to ZSH ==="
     chsh -s /usr/bin/zsh
