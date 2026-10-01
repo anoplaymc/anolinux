@@ -46,8 +46,11 @@ xfce: "ano install xfce4"
 ## What you need to install yourself (in future, it will be included on "configure.sh" script):
 ### AUR Repositories (yay) (if you need)
 ano install --needed base-devel git
+
 git clone https://aur.archlinux.org/yay.git
+
 cd yay
+
 makepkg -si
 ### Pipewire or PulseAudio:
 ano install pipewire / ano install pulseaudio
@@ -55,9 +58,13 @@ ano install pipewire / ano install pulseaudio
 ano install pavucontrol
 ### zsh with "powerlevel10k" theme (if you need) (AUR needed)
 ano install zsh ttf-meslo-nerd-font-powerlevel10k
+
 chsh -s /usr/bin/zsh
+
 yay -S zsh-theme-powerlevel10k-git
+
 echo 'source /usr/share/zsh-theme-powerlevel10k/powerlevel10k.zsh-theme' >> ~/.zshrc
+
 source ~/.zshrc
 ## 📦 Installation Guide
 
