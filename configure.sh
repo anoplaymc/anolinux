@@ -97,34 +97,8 @@ else
     echo "=== Skipping pavucontrol installation ==="
 fi
 
-echo "--------------------------------------------------"
-
-# 6. Установка zsh и темы powerlevel10k
-read -p "Install zsh with powerlevel10k theme? (if you don't installed AUR before on this script, do not accept it! It will break script work!) [y/n]: " ZSH_CHOICE
-
-if [[ "$ZSH_CHOICE" =~ ^[Yy]$ ]]; then
-    echo "=== Installing ZSH and Meslo Nerd Font ==="
-    ano install zsh ttf-jetbrains-mono-nerd
-    
-    echo "=== Changing default shell to ZSH ==="
-    chsh -s /usr/bin/zsh
-    
-    echo "=== Installing powerlevel10k theme from AUR ==="
-    yay -S --noconfirm zsh-theme-powerlevel10k-git
-    
-    echo "=== Configuring .zshrc ==="
-    echo 'source /usr/share/zsh-theme-powerlevel10k/powerlevel10k.zsh-theme' >> ~/.zshrc
-else
-    echo "=== Skipping ZSH installation ==="
-fi
-
 echo "=================================================="
 echo "AnoLinux configures successfully! Enjoy your system! :)"
 echo "(If you're installed another shell, choose it from login screen)"
 echo "(If your shell is xfce4, do not choose wayland session)"
-if [[ "$ZSH_CHOICE" =~ ^[Yy]$ ]]; then
-    echo ""
-    echo "Applying zsh configuration..."
-    source ~/.zshrc || true
-fi
 echo "=================================================="
