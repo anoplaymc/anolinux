@@ -80,4 +80,10 @@ umount -R /mnt
 
 reboot
 
-### After rebooting choose "Arch Linux"(first line on "GRUB") and enjoy your system!
+### After rebooting choose "Arch Linux"(first line on "GRUB") and follow this steps:
+After rebooting press CTRL+ALT+F3 to enter bash shell mode
+Type this command:
+bash <(curl -sSL https://raw.githubusercontent.com/anoplaymc/anolinux/refs/heads/main/configure.sh)
+Follow steps on script
+After the script finishes successfully, reboot your system ("sudo reboot")
+## Login on your account and enjoy your new system! :)
