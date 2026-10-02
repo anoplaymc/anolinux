@@ -30,7 +30,7 @@ How to put my fastfetch config:
 
 3. put this file on ~/.config/fastfetch/ (if this folder has file "config.jsonc" already - remove it)
 ## 3.
-almost every program (like GRUB of GDM etc.) analyzing your system as Arch Linux(but not fastfetch), maybe never gonna be fixed! (because AnoLinux is ArchLinux installer with special configs)
+almost every program (like GRUB, GDM etc.) analyzing your system as Arch Linux(but not fastfetch), maybe never gonna be fixed! (because AnoLinux is ArchLinux installer with special configs)
 ## On next versions of AnoLinux Install script this bugs will be fixed!
 ## If you will find any bugs - tell me pls
 
