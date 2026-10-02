@@ -44,19 +44,7 @@ Hyprland: "ano install hyprland"
 xfce: "ano install xfce4"
 
 ## What you need to install yourself (in future, it will be included on "configure.sh" script):
-### AUR Repositories (yay) (if you need)
-ano install --needed base-devel git
-
-git clone https://aur.archlinux.org/yay.git
-
-cd yay
-
-makepkg -si
-### Pipewire or PulseAudio:
-ano install pipewire / ano install pulseaudio
-### Volume Control (if you need)
-ano install pavucontrol
-### zsh with "powerlevel10k" theme (if you need) (AUR needed)
+### zsh with "powerlevel10k" theme (if you need) (AUR needed) (you can install AUR with "configure.sh" script)
 ano install zsh ttf-meslo-nerd-font-powerlevel10k
 
 chsh -s /usr/bin/zsh
