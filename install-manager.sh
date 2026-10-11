@@ -1,6 +1,7 @@
 #!/bin/bash
 set -e
 
+# Проверка на запуск скрипта установки от root
 if [ "$EUID" -ne 0 ]; then
     echo "[-] Error: Please run this script with root privileges (sudo)."
     exit 1
@@ -12,27 +13,17 @@ echo "=================================================="
 
 cat << 'ANO_SCRIPT' > /usr/local/bin/ano
 #!/bin/bash
-if [ "$1" = "update" ]; then
-    sudo pacman -Syu
-elif [ "$1" = "install" ]; then
-    shift
-    sudo pacman -S "$@"
-elif [ "$1" = "remove" ]; then
-    shift
-    sudo pacman -R "$@"
-elif [ "$1" = "search" ]; then
-    shift
-    sudo pacman -Ss "$@"
-elif [ "$1" = "delmgr" ]; then
-    echo "=== AnoLinux Package Manager Uninstallation ==="
-    
-    # Проверка на root-права для удаления
+
+# Проверяем команду удаления пакетного менеджера
+if [ "$1" = "delmgr" ]; then
+    # Жесткая проверка: если запуск не от root, сразу выдаем ошибку
     if [ "$EUID" -ne 0 ]; then
         echo "[-] Error: Removing 'ano' requires root privileges."
         echo "    Please run: sudo ano delmgr"
         exit 1
     fi
 
+    echo "=== AnoLinux Package Manager Uninstallation ==="
     read -p "Are you sure you want to completely remove 'ano' manager from the system? [y/N]: " CONFIRM
     if [[ "$CONFIRM" =~ ^[Yy]$ ]]; then
         if rm -f /usr/local/bin/ano; then
@@ -46,6 +37,20 @@ elif [ "$1" = "delmgr" ]; then
         echo "[*] Uninstallation cancelled."
         exit 0
     fi
+fi
+
+# Остальные команды менеджера
+if [ "$1" = "update" ]; then
+    sudo pacman -Syu
+elif [ "$1" = "install" ]; then
+    shift
+    sudo pacman -S "$@"
+elif [ "$1" = "remove" ]; then
+    shift
+    sudo pacman -R "$@"
+elif [ "$1" = "search" ]; then
+    shift
+    sudo pacman -Ss "$@"
 else
     echo "=== AnoLinux Package Manager (ano) ==="
     echo "Usage:"
@@ -57,6 +62,7 @@ else
 fi
 ANO_SCRIPT
 
+# Делаем файл исполняемым
 chmod +x /usr/local/bin/ano
 
 echo "=================================================="
