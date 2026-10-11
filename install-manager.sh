@@ -1,7 +1,6 @@
 #!/bin/bash
 set -e
 
-# Проверка на запуск от root
 if [ "$EUID" -ne 0 ]; then
     echo "[-] Error: Please run this script with root privileges (sudo)."
     exit 1
@@ -10,9 +9,6 @@ fi
 echo "=================================================="
 echo "          ANO MANAGER INSTALLATION SCRIPT         "
 echo "=================================================="
-
-# 1. Создание скрипта пакетного менеджера 'ano'
-echo "[*] Installing 'ano' wrapper to /usr/local/bin/ano..."
 
 cat << 'ANO_SCRIPT' > /usr/local/bin/ano
 #!/bin/bash
@@ -29,12 +25,23 @@ elif [ "$1" = "search" ]; then
     sudo pacman -Ss "$@"
 elif [ "$1" = "delmgr" ]; then
     echo "=== AnoLinux Package Manager Uninstallation ==="
+    
+    # Проверка на root-права для удаления
+    if [ "$EUID" -ne 0 ]; then
+        echo "[-] Error: Removing 'ano' requires root privileges."
+        echo "    Please run: sudo ano delmgr"
+        exit 1
+    fi
+
     read -p "Are you sure you want to completely remove 'ano' manager from the system? [y/N]: " CONFIRM
     if [[ "$CONFIRM" =~ ^[Yy]$ ]]; then
-        echo "[*] Removing /usr/local/bin/ano..."
-        rm -f /usr/local/bin/ano
-        echo "[+] 'ano' package manager has been successfully removed from your system."
-        exit 0
+        if rm -f /usr/local/bin/ano; then
+            echo "[+] 'ano' package manager has been successfully removed from your system."
+            exit 0
+        else
+            echo "[-] Error: Failed to remove /usr/local/bin/ano"
+            exit 1
+        fi
     else
         echo "[*] Uninstallation cancelled."
         exit 0
@@ -50,16 +57,8 @@ else
 fi
 ANO_SCRIPT
 
-# 2. Выставление правильных прав на выполнение
 chmod +x /usr/local/bin/ano
 
 echo "=================================================="
 echo "      'ano' PACKAGE MANAGER SUCCESSFULLY INSTALLED!"
-echo "=================================================="
-echo "You can now use it in your terminal:"
-echo "  ano update"
-echo "  ano install <package>"
-echo "  ano remove <package>"
-echo "  ano search <query>"
-echo "  ano delmgr (to uninstall)"
 echo "=================================================="
