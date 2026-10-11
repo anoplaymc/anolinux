@@ -48,6 +48,9 @@ elif [ "$1" = "install" ]; then
 elif [ "$1" = "remove" ]; then
     shift
     sudo pacman -R "$@"
+elif [ "$1" = "removeall" ]; then
+    shift
+    sudo pacman -Rns "$@"
 elif [ "$1" = "search" ]; then
     shift
     sudo pacman -Ss "$@"
@@ -56,7 +59,8 @@ else
     echo "Usage:"
     echo "  ano update   - Synchronize and upgrade system"
     echo "  ano install  - Install software packages"
-    echo "  ano remove   - Remove software packages"
+    echo "  ano remove   - Remove software package"
+    echo "  ano removeall- Remove software package and needed for it"
     echo "  ano search   - Search in AnoLinux repositories"
     echo "  ano delmgr   - Completely remove 'ano' package manager from system"
 fi
