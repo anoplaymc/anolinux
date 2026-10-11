@@ -1,12 +1,14 @@
-# 🚀 AnoLinux
+# 🚀 AnoLinux/Ano Package Manager
 
 ## If you want to install this distro normally, please read all this text!
 
 A custom Linux distribution based on **Arch Linux**, featuring **KDE Plasma**, a custom `ano` package manager wrapper, pre-configured `fastfetch`, and an automated bash installer.
 
+Also a package manager for make Arch (and maybe NixOS in future) a bit easier (ano package manager installisation in the end)
+
 ## !! If you are beginner on linux, installing AnoLinux is not really recommended !!
 
-## !! WARNING !! Bios(non-UEFI) installisation metod is on testing now, please use UEFI if you can!
+## !! WARNING !! Bios(non-UEFI) installation metod is on testing now, please use UEFI if you can!
 
 ## BUGS !!IMPORTANT TO READ!!:
 ## 1.
@@ -105,3 +107,14 @@ bash <(curl -sSL https://raw.githubusercontent.com/anoplaymc/anolinux/refs/heads
 Follow steps on script
 After the script finishes successfully, reboot your system ("sudo reboot")
 ## Login on your account and enjoy your new system! :)
+
+
+# How to install Ano Package Manager
+## On Arch or Arch-based Linux Distros:
+### Step 1. Download the installer
+curl -sSL https://raw.githubusercontent.com/anoplaymc/anolinux/refs/heads/main/install-manager.sh -o install-manager.sh
+### Step 2. Make script executable
+chmod +x install-manager.sh
+### Step 3. Run installation script
+sudo ./install-manager.sh
+## After this steps you can enjoy Fully working Ano Package Manager! :) (How to delete: sudo ano delmgr or sudo rm -rf /usr/local/bin/ano)
