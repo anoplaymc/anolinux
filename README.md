@@ -2,7 +2,7 @@
 
 ## If you want to install this distro normally, please read all this text!
 
-A custom Linux distribution based on **Arch Linux**, featuring **KDE Plasma**, a custom `ano` package manager wrapper, pre-configured `fastfetch`, and an automated bash installer.
+A custom Linux distribution based on **Arch Linux**, featuring **KDE Plasma**, a custom `ano` package manager(available on Arch, scroll down), pre-configured `fastfetch`, and an automated bash installer.
 
 Also a package manager for make Arch (and maybe NixOS in future) a bit easier (ano package manager installisation in the end)
 
