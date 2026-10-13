@@ -4,6 +4,7 @@ set -e
 # Проверка на запуск скрипта установки от root
 if [ "$EUID" -ne 0 ]; then
     echo "[-] Error: Please run this script with root privileges (sudo)."
+    echo "    Run: sudo ./nixos-manager.sh"
     exit 1
 fi
 
@@ -11,7 +12,10 @@ echo "=================================================="
 echo "      ANO MANAGER INSTALLATION SCRIPT (NIXOS)     "
 echo "=================================================="
 
-cat << 'ANO_SCRIPT' > /usr/local/bin/ano
+# Создаем временный файл скрипта
+ANO_TMP="/tmp/ano_manager.sh"
+
+cat << 'ANO_SCRIPT' > "$ANO_TMP"
 #!/bin/bash
 
 CONFIG_FILE="/etc/nixos/configuration.nix"
@@ -85,7 +89,7 @@ elif [ "$1" = "install" ]; then
     if [ -z "$1" ]; then
         echo "[-] Error: No package specified."
         exit 1
-    fi
+    }
     
     # 1. Сначала запускаем nix-shell с пакетом
     echo "[*] Launching temporary nix-shell for '$1'..."
@@ -95,10 +99,10 @@ elif [ "$1" = "install" ]; then
     # 2. Добавляем пакет в configuration.nix
     add_to_config "$1"
 
-    # Ждем завершения сессии nix-shell (или можно оставить выполняться)
+    # Ждем завершения сессии nix-shell
     wait $SHELL_PID || true
 
-    # 3. Выводим сообщение с требованием запустить ano update
+    # 3. Выводим требуемое сообщение
     echo "=================================================="
     echo "      Packages installed, type \"ano update\" to finish installation"
     echo "=================================================="
@@ -115,7 +119,8 @@ else
 fi
 ANO_SCRIPT
 
-# Делаем файл исполняемым
+# Переносим готовый скрипт в /usr/local/bin/ano и делаем исполняемым
+mv "$ANO_TMP" /usr/local/bin/ano
 chmod +x /usr/local/bin/ano
 
 echo "=================================================="
