@@ -8,14 +8,35 @@ if [ "$EUID" -ne 0 ]; then
 fi
 
 echo "=================================================="
-echo "          ANO MANAGER INSTALLATION SCRIPT         "
+echo "         ANO MANAGER INSTALLATION SCRIPT          "
 echo "=================================================="
 
+# 1. Проверяем, есть ли уже старый скрипт ano, и удаляем его перед установкой нового
+if [ -f /usr/local/bin/ano ]; then
+    echo "[*] Found existing 'ano' script. Removing old version..."
+    rm -f /usr/local/bin/ano
+fi
+
+# 2. Генерируем тело скрипта ano с динамической проверкой os-release
 cat << 'ANO_SCRIPT' > /usr/local/bin/ano
 #!/bin/bash
 
-# Проверяем команду удаления пакетного менеджера
+# Определяем текущий дистрибутив по /etc/os-release
+IS_ANOLINUX=false
+if [ -f /etc/os-release ]; then
+    . /etc/os-release
+    if [ "$ID" = "anolinux" ]; then
+        IS_ANOLINUX=true
+    fi
+fi
+
+# Проверяем команду удаления пакетного менеджера (доступна ТОЛЬКО если это НЕ AnoLinux)
 if [ "$1" = "delmgr" ]; then
+    if [ "$IS_ANOLINUX" = true ]; then
+        echo "[-] Error: 'ano' is the native package manager of AnoLinux and cannot be removed via delmgr."
+        exit 1
+    fi
+
     # Жесткая проверка: если запуск не от root, сразу выдаем ошибку
     if [ "$EUID" -ne 0 ]; then
         echo "[-] Error: Removing 'ano' requires root privileges."
@@ -62,7 +83,11 @@ else
     echo "  ano remove   - Remove software package"
     echo "  ano removeall- Remove software package and needed for it"
     echo "  ano search   - Search in AnoLinux repositories"
-    echo "  ano delmgr   - Completely remove 'ano' package manager from system"
+    
+    # Показываем delmgr в справке только если это НЕ AnoLinux
+    if [ "$IS_ANOLINUX" = false ]; then
+        echo "  ano delmgr   - Completely remove 'ano' package manager from system"
+    fi
 fi
 ANO_SCRIPT
 
