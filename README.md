@@ -22,7 +22,7 @@ and basical system and DE utilities
 Hyprland: "ano install hyprland"
 xfce: "ano install xfce4"
 source ~/.zshrc
-## 📦 Installation Guide
+# 📦 Installation Guide
 ## Manual installation (for advanced users)
 To install AnoLinux manually, you need to read the [AnoLinux Handbook](https://github.com/anoplaymc/anolinux-handbook)
 ## Automatic (easy, recommended for new users)
