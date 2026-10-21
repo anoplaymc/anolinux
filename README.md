@@ -4,12 +4,7 @@
 
 A custom Linux distribution based on **Arch Linux**, featuring **KDE Plasma**, a custom `ano` package manager(available on Arch), pre-configured `fastfetch`, and an automated bash installer.
 
-Also a package manager for make Arch (and maybe NixOS in future) a bit easier (ano package manager installation on Arch Linux in the end)
-
-## !! If you are beginner on linux, installing AnoLinux is not really recommended !!
-
-## On next versions of AnoLinux Install script this bugs will be fixed!
-## If you will find any bugs - tell me pls
+Also a package manager for make Arch (and maybe other OS in future) a bit easier (ano package manager installation on Arch Linux in the end)
 
 ## Usage:
 AnoLinux has a package manager "ano", its pacman-based and you can run "ano install" without sudo, 
@@ -18,10 +13,7 @@ Also you can use basic pacman package manager there!
 
 After installisation you will have a preinstalled kde plasma, kitty, sddm, fastfetch 
 and basical system and DE utilities
-(You can install another shell, for example:
-Hyprland: "ano install hyprland"
-xfce: "ano install xfce4"
-source ~/.zshrc
+(also you can choise another shell (DE/WM), install drivers, sound and more)
 # 📦 Installation Guide
 ## Manual installation (for advanced users) (latest)
 To install AnoLinux manually, you need to read the [AnoLinux Handbook](https://github.com/anoplaymc/anolinux-handbook)
