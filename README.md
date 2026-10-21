@@ -23,8 +23,9 @@ Hyprland: "ano install hyprland"
 xfce: "ano install xfce4"
 source ~/.zshrc
 ## 📦 Installation Guide
-### Manual installation
+## Manual installation (for advanced users)
 To install AnoLinux manually, you need to read the [AnoLinux Handbook](https://github.com/anoplaymc/anolinux-handbook)
+## Automatic (easy, recommended for new users)
 To install AnoLinux, boot from any official Arch Linux Live ISO, connect to the internet, and follow these steps:
 
 ### Step 1. Disk Partitioning by installing script
